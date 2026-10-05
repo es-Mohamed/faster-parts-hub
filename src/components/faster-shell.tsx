@@ -4,13 +4,14 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button"; 
 import { copy, useStore } from "@/lib/store"; 
 import logoAsset from "@/assets/faster-logo.png";
+import fasterlogow from "@/assets/faster-logo-white.png";
 
 // تم استبدال الأقسام بالمنتجات في شريط الموبايل السفلي
 const nav=[{to:"/",key:"home",icon:Home},{to:"/products",key:"products",icon:Grid2X2},{to:"/cart",key:"cart",icon:ShoppingCart},{to:"/account",key:"account",icon:UserRound}] as const;
 type InstallEvent=Event&{prompt:()=>Promise<void>;userChoice:Promise<{outcome:string}>};
 
 export function FasterShell({children}:{children:React.ReactNode}){
-  const {lang,toggleLang,count}=useStore();
+  const {lang,toggleLang,count, user}=useStore();
   const t=copy[lang];
   const [search,setSearch]=useState(false);
   const [install,setInstall]=useState<InstallEvent>();
@@ -26,11 +27,11 @@ export function FasterShell({children}:{children:React.ReactNode}){
     <div dir={lang==="ar"?"rtl":"ltr"} className="min-h-screen bg-background pb-20 md:pb-0">
       <header className="sticky top-0 z-50 border-b border-header-border bg-header text-header-foreground">
         <div className="mx-auto grid h-18 max-w-7xl grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 px-4 md:h-20 md:px-6">
-          <Link to="/" aria-label="Faster home" className="order-1 flex shrink-0 items-center gap-3">
-            <img src={logoAsset} className="h-8 w-auto object-contain md:h-10" alt="Faster Auto Spare Parts"/>
+          <Link to="/" aria-label="Faster home" className="order-1 flex shrink-0 items-center gap-3 md:gap-4">
+            <img src={logoAsset} className="h-18 w-auto object-contain  drop-shadow-lg" alt="Faster Auto Spare Parts"/>
             <div className="flex flex-col">
-              <b className="text-xl font-black leading-none tracking-tight text-brand md:text-2xl">FASTER</b>
-              <span className="text-[9px] font-bold tracking-widest text-header-muted uppercase md:text-[10px]">Auto Parts</span>
+              <b className="text-xl font-extrabold leading-none tracking-[0.15em] text-brand md:text-2xl">FASTER</b>
+              <span className="mt-1 text-[8px] font-bold tracking-[0.3em] text-header-muted uppercase md:text-[9px]">Auto Parts</span>
             </div>
           </Link>
           <nav className="order-2 hidden min-w-0 items-center justify-center gap-7 md:flex">
@@ -44,7 +45,7 @@ export function FasterShell({children}:{children:React.ReactNode}){
               <Button variant="header" size="icon" aria-label={t.search} onClick={()=>setSearch(v=>!v)}>{search?<X/>:<Search/>}</Button>
             </div>
             <Button variant="language" size="sm" onClick={toggleLang}>{lang==="ar"?"EN":"عربي"}</Button>
-            <Link to="/account" className="hidden md:grid h-10 w-10 place-items-center text-header-muted hover:text-brand"><UserRound className="size-5"/></Link>
+            <Link to={user ? "/dashboard" : "/auth/login"} className="hidden md:grid h-10 w-10 place-items-center text-header-muted hover:text-brand"><UserRound className="size-5"/></Link>
             <Link to="/cart" className="relative hidden md:grid h-10 w-10 place-items-center text-header-muted hover:text-brand">
               <ShoppingCart className="size-5"/>
               {count>0&&<span className="absolute end-0 top-0 grid size-5 place-items-center rounded-full bg-brand text-[10px] font-bold text-brand-foreground">{count}</span>}
@@ -70,16 +71,29 @@ export function FasterShell({children}:{children:React.ReactNode}){
       <FasterFooter lang={lang}/>
       
       <nav className="fixed inset-x-0 bottom-0 z-50 grid h-18 grid-cols-4 border-t border-header-border bg-header md:hidden">
-        {nav.map(n=>{
-          const Icon=n.icon;
-          const active=n.to==="/"?path==="/":path.startsWith(n.to);
+        {nav.map((n) => {
+          // السطر ده هو اللي كان ناقص وعمل المشكلة
+          const Icon = n.icon; 
+          
+          // تحديد المسار بناءً على حالة تسجيل الدخول
+          const targetPath = n.key === "account" ? (user ? "/dashboard" : "/auth/login") : n.to;
+          const active = n.to === "/" ? path === "/" : path.startsWith(n.to);
+          
           return (
-            <Link key={n.to} to={n.to} className={`relative flex flex-col items-center justify-center gap-1 text-[10px] font-semibold ${active?"text-brand":"text-header-muted"}`}>
-              <Icon className="size-5"/>
+            <Link 
+              key={n.to} 
+              to={targetPath} 
+              className={`relative flex flex-col items-center justify-center gap-1 text-[10px] font-semibold ${active ? "text-brand" : "text-header-muted"}`}
+            >
+              <Icon className="size-5" />
               <span>{t[n.key as keyof typeof t]}</span>
-              {n.key==="cart"&&count>0&&<b className="absolute end-[28%] top-2 grid size-4 place-items-center rounded-full bg-brand text-[9px] text-brand-foreground">{count}</b>}
+              {n.key === "cart" && count > 0 && (
+                <b className="absolute end-[28%] top-2 grid size-4 place-items-center rounded-full bg-brand text-[9px] text-brand-foreground">
+                  {count}
+                </b>
+              )}
             </Link>
-          )
+          );
         })}
       </nav>
     </div>
@@ -92,29 +106,37 @@ function FasterFooter({lang}:{lang:"ar"|"en"}){
     <footer className="border-t border-border bg-[#0A0A0A] pb-20 text-gray-400 md:pb-0">
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 md:grid-cols-4 md:gap-12 md:px-6 md:py-16">
         <div className="mb-2 md:mb-0 md:col-span-1">
-          <div className="flex items-center gap-3">
-            <img src={logoAsset} className="h-10 w-auto object-contain" alt="Faster Auto Spare Parts"/>
-            <b className="text-2xl font-black tracking-tight text-[#FACC15]">FASTER</b>
+          <div className="flex items-center gap-3 md:gap-4">
+            <img src={fasterlogow} className="h-17 w-auto object-contain " alt="Faster Auto Spare Parts"/>
+            <div className="flex flex-col justify-center">
+              <b className="text-2xl font-extrabold leading-none tracking-[0.15em] text-[#FACC15]">
+                FASTER
+              </b>
+              <span className="mt-1 text-[9px] font-bold tracking-[0.3em] text-gray-500 uppercase">
+                Auto Parts
+              </span>
+            </div>
           </div>
-          <p className="mt-5 text-sm leading-relaxed text-gray-400">
-            {ar?"وجهتك الموثوقة لقطع غيار السيارات الأصلية. جودة لا تُضاهى وأداء يعتمد عليه لجميع السيارات.":"Your trusted destination for genuine automotive parts. Unmatched quality and reliable performance."}
+          <p className="mt-6 text-sm leading-relaxed text-gray-400">
+            {ar ? "وجهتك الموثوقة لقطع غيار السيارات الأصلية. جودة لا تُضاهى وأداء يعتمد عليه لجميع السيارات." : "Your trusted destination for genuine automotive parts. Unmatched quality and reliable performance."}
           </p>
         </div>
         
         <FooterColumn 
-          title={ar?"الشركة":"Company"} 
+          title={ar ? "الشركة" : "Company"} 
           links={[
-            { label: ar ? "جميع المنتجات" : "All Products", to: "/products" },
-            { label: ar ? "حساب التاجر" : "Trade Account", to: "/account" }
+            { label: ar ? "كل المنتجات" : "All Products", to: "/products" },
+            { label: ar ? "حسابي" : "My Account", to: "/account" },
+            { label: ar ? "من نحن" : "About Us", to: "/about" } // ضفنا صفحة من نحن
           ]} 
-        />
+        />      
         
         <FooterColumn 
-          title={ar?"الدعم والمساعدة":"Support"} 
+          title={ar ? "الدعم والمساعدة" : "Support & Help"} 
           links={[
-            { label: ar ? "تواصل معنا" : "Contact Us", to: "/contact" },
-            { label: ar ? "سياسة الضمان" : "Warranty Policy", to: "/contact" },
-            { label: ar ? "الشحن والتوصيل" : "Shipping & Delivery", to: "/contact" }
+            { label: ar ? "الضمان والاسترجاع" : "Warranty & Returns", to: "/warranty" },
+            { label: ar ? "الشحن والتوصيل" : "Shipping & Delivery", to: "/shipping" },
+            { label: ar ? "الأسئلة الشائعة" : "Frequently Asked Questions", to: "/support" },
           ]} 
         />
         

@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "framer-motion";
-import { CircleGauge, Cog, Disc3, Zap } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import { CircleGauge, Cog, Disc3, Zap, ChevronRight, ChevronLeft, MousePointerClick } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ProductCard, SectionTitle, TradeBanner, TrustStrip } from "@/components/catalog";
 import { products } from "@/lib/catalog";
@@ -159,34 +159,94 @@ function HeroCarousel({ lang, t }: { lang: "ar" | "en"; t: typeof copy.ar }) {
 }
 
 function BrandMarquee() {
+  const { lang } = useStore();
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [isPaused, setIsPaused] = useState(false);
+
   const logos = [
-    { name: "ISUZU", src: brandIsuzu },
-    { name: "Toyota", src: brandToyota },
-    { name: "Nissan", src: brandNissan },
-    { name: "MITSUBISHI", src: brandMitsubishi },
-    { name: "Suzuki", src: brandMazda }
+    { id: "isuzu", name: "ISUZU", src: brandIsuzu },
+    { id: "toyota", name: "Toyota", src: brandToyota },
+    { id: "nissan", name: "Nissan", src: brandNissan },
+    { id: "mitsubishi", name: "MITSUBISHI", src: brandMitsubishi },
+    { id: "suzuki", name: "Suzuki", src: brandMazda }
   ];
 
-  const group = (key: string) => (
-    <div key={key} className="flex shrink-0 gap-4 pe-4">
-      {logos.map(brand => (
-        <div key={`${key}-${brand.name}`} className="grid h-24 w-44 shrink-0 place-items-center rounded-md bg-product p-4 md:h-28 md:w-56">
-          <img 
-            src={brand.src} 
-            alt={`${brand.name} logo`} 
-            className="h-12 w-auto max-w-full object-contain md:h-16" 
-            loading="lazy" 
-          />
-        </div>
-      ))}
-    </div>
-  );
+  // تكرار اللوجوهات لعمل شريط لا نهائي
+  const repeatedLogos = Array(6).fill(logos).flat();
+
+  // الحركة التلقائية
+  useEffect(() => {
+    if (isPaused) return;
+    const interval = setInterval(() => {
+      if (scrollRef.current) {
+        const sign = lang === "ar" ? -1 : 1;
+        scrollRef.current.scrollBy({ left: sign * 1.5 });
+      }
+    }, 30); // سرعة الحركة
+    return () => clearInterval(interval);
+  }, [isPaused, lang]);
+
+  // التحكم اليدوي بالأسهم
+  const scroll = (direction: "left" | "right") => {
+    if (scrollRef.current) {
+      const sign = lang === "ar" ? -1 : 1;
+      const amount = direction === "right" ? 300 * sign : -300 * sign;
+      scrollRef.current.scrollBy({ left: amount, behavior: "smooth" });
+    }
+  };
 
   return (
-    <div dir="ltr" className="overflow-hidden rounded-lg border border-border bg-card py-5 shadow-card">
-      <div className="flex w-max animate-marquee">
-        {group("a")}
-        {group("b")}
+    <div 
+      className="group relative overflow-hidden rounded-lg border border-border bg-card py-5 shadow-card"
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+      onTouchStart={() => setIsPaused(true)}
+      onTouchEnd={() => setIsPaused(false)}
+    >
+      {/* بادج توضيحي شيك ليعرف المستخدم أنه قابل للضغط */}
+      <div className="absolute top-2 z-10 flex w-full justify-center opacity-70 transition-opacity group-hover:opacity-100">
+        <span className="flex items-center gap-1.5 rounded-full bg-background/80 px-3 py-1 text-[10px] font-bold text-muted-foreground backdrop-blur md:text-xs">
+          <MousePointerClick className="size-3" />
+          {lang === "ar" ? "اضغط على الماركة لعرض منتجاتها" : "Click a brand to view products"}
+        </span>
+      </div>
+
+      {/* زر السهم يمين (عائم) */}
+      <button 
+        onClick={() => scroll("right")} 
+        className="absolute right-2 top-1/2 z-20 grid size-10 -translate-y-1/2 place-items-center rounded-full bg-background/90 text-foreground opacity-0 shadow-md backdrop-blur transition-all duration-300 hover:scale-110 hover:bg-brand hover:text-black group-hover:opacity-100 md:size-12"
+      >
+        <ChevronRight className="size-6 md:size-7" />
+      </button>
+
+      {/* زر السهم يسار (عائم) */}
+      <button 
+        onClick={() => scroll("left")} 
+        className="absolute left-2 top-1/2 z-20 grid size-10 -translate-y-1/2 place-items-center rounded-full bg-background/90 text-foreground opacity-0 shadow-md backdrop-blur transition-all duration-300 hover:scale-110 hover:bg-brand hover:text-black group-hover:opacity-100 md:size-12"
+      >
+        <ChevronLeft className="size-6 md:size-7" />
+      </button>
+
+      {/* شريط الماركات */}
+      <div 
+        ref={scrollRef} 
+        className="scrollbar-none flex gap-4 overflow-x-auto px-4 pt-4"
+      >
+        {repeatedLogos.map((brand, i) => (
+          <Link 
+            key={`${brand.id}-${i}`} 
+            to="/products"
+            search={{ brand: brand.id }}
+            className="grid h-32 w-32 shrink-0 place-items-center rounded-2xl bg-product p-2 transition-transform duration-300 hover:-translate-y-1 hover:shadow-glow md:h-40 md:w-40"
+          >
+            <img 
+              src={brand.src} 
+              alt={`${brand.name} logo`} 
+              className="h-full w-full object-contain drop-shadow-sm" 
+              loading="lazy" 
+            />
+          </Link>
+        ))}
       </div>
     </div>
   );

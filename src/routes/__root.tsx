@@ -1,4 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useRouterState } from "@tanstack/react-router";
+import { SplashScreen } from "@/components/SplashScreen";
 import {
   Outlet,
   Link,
@@ -7,10 +9,9 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
-import { reportLovableError } from "../lib/lovable-error-reporting";
 import { FasterShell } from "../components/faster-shell";
 import { StoreProvider } from "../lib/store";
 
@@ -39,10 +40,7 @@ function NotFoundComponent() {
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
   const router = useRouter();
-  useEffect(() => {
-    reportLovableError(error, { boundary: "tanstack_root_error_component" });
-  }, [error]);
-
+  
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
@@ -87,6 +85,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:type", content: "website" },
       { property: "og:site_name", content: "Faster" },
       { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:image", content: "/og-image.jpg" },
+      { name: "twitter:image", content: "/og-image.jpg" },
+      
     ],
     links: [
       {
@@ -94,7 +95,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         href: appCss,
       },
       { rel: "icon", href: "/favicon.png", type: "image/png" },
-      { rel: "apple-touch-icon", href: "/icon-192.png" },
+      { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
       { rel: "manifest", href: "/manifest.webmanifest" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
@@ -123,10 +124,44 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  
+  // تهيئة حالة شاشة البداية بذكاء (للموبايل فقط ولمرة واحدة في الجلسة)
+  const [showSplash, setShowSplash] = useState(() => {
+    if (typeof window !== "undefined") {
+      const isMobile = window.innerWidth < 768; // أقل من 768 بكسل يعتبر موبايل
+      const hasSeenSplash = sessionStorage.getItem("faster_splash_seen");
+
+      // إذا كان موبايل ولم يرى الشاشة من قبل في هذه الجلسة
+      if (isMobile && !hasSeenSplash) {
+        sessionStorage.setItem("faster_splash_seen", "true");
+        return true;
+      }
+    }
+    return false; // لا تظهر على الديسكتوب أو إذا تم عمل Refresh
+  });
+  
+  const isIsolatedRoute = pathname.startsWith('/auth') || 
+                          pathname.startsWith('/dashboard') || 
+                          pathname.startsWith('/admin');
 
   return (
     <QueryClientProvider client={queryClient}>
-      <StoreProvider><FasterShell><Outlet /></FasterShell></StoreProvider>
+      <StoreProvider>
+        {showSplash ? (
+          <SplashScreen onComplete={() => setShowSplash(false)} />
+        ) : (
+          <div className="animate-in fade-in duration-500">
+            {isIsolatedRoute ? (
+              <Outlet />
+            ) : (
+              <FasterShell>
+                <Outlet />
+              </FasterShell>
+            )}
+          </div>
+        )}
+      </StoreProvider>
     </QueryClientProvider>
   );
 }

@@ -20,7 +20,7 @@ export function ProductCard({ product }: { product: Product }) {
   const title = isAr ? product.nameAr : product.nameEn;
 
   return (
-    <article className="group relative flex flex-col justify-between overflow-hidden rounded-[16px] border border-border bg-card shadow-sm transition-all hover:shadow-md">
+    <article className="group relative flex flex-col overflow-hidden rounded-[16px] border border-border bg-card shadow-sm transition-all hover:shadow-md">
       <Link to="/products/$productId" params={{ productId: product.id }} className="relative block shrink-0">
         <div className="absolute right-2 top-2 z-10 flex flex-col items-end gap-1">
           <span className="rounded-full bg-[#FACC15] px-2.5 py-0.5 text-[10px] font-bold text-black shadow-sm">
@@ -39,14 +39,17 @@ export function ProductCard({ product }: { product: Product }) {
         </div>
       </Link>
 
-      <div className="flex flex-1 flex-col p-3.5">
+      <div className="flex flex-col p-3.5">
         <Link to="/products/$productId" params={{ productId: product.id }} className="flex flex-col">
           <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">{product.partNo}</p>
-          <h3 className="mt-1 line-clamp-2 text-sm font-bold leading-snug text-foreground md:text-base">
+          
+          {/* تثبيت ارتفاع العنوان ليكون اسطمبة واحدة (سطرين) في كل الكروت */}
+          <h3 className="mt-1 h-10 line-clamp-2 text-sm font-bold leading-snug text-foreground md:h-12 md:text-base">
             {title}
           </h3>
 
-          <div className="mt-3 flex flex-wrap gap-1.5">
+          {/* تثبيت ارتفاع التاجز (ماركات التوافق) */}
+          <div className="mt-3 flex h-6 flex-wrap gap-1.5 overflow-hidden">
             {product.compatibility.slice(0, 2).map((c) => (
               <span key={c} className="rounded-full border border-blue-200 bg-blue-50 px-2 py-0.5 text-[9px] font-medium text-blue-600 dark:border-blue-900 dark:bg-blue-950 dark:text-blue-400">
                 {c.replace(/[0-9-]/g, '').trim()}
@@ -96,12 +99,30 @@ export function TrustStrip() {
   );
 }
 
+// export function TradeBanner() {
+//   const { lang } = useStore();
+//   const t = copy[lang];
+//   const Arrow = lang === "ar" ? ArrowLeft : ArrowRight;
+//   return (
+//     <Link to={user ? "/dashboard" : "/auth/login"} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 rounded-lg bg-brand px-5 py-4 text-brand-foreground shadow-brand">
+//       <div className="min-w-0">
+//         <h2 className="text-lg font-black">{t.trade}</h2>
+//         <p className="mt-1 text-xs font-medium opacity-75">{t.tradeSub}</p>
+//       </div>
+//       <span className="grid size-11 shrink-0 place-items-center rounded-md bg-header text-brand"><Arrow /></span>
+//     </Link>
+//   );
+// }
+
+
 export function TradeBanner() {
-  const { lang } = useStore();
+  // التعديل هنا: قمنا بإضافة user بجانب lang
+  const { lang, user } = useStore(); 
   const t = copy[lang];
   const Arrow = lang === "ar" ? ArrowLeft : ArrowRight;
+  
   return (
-    <Link to="/account" className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 rounded-lg bg-brand px-5 py-4 text-brand-foreground shadow-brand">
+    <Link to={user ? "/dashboard" : "/auth/login"} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 rounded-lg bg-brand px-5 py-4 text-brand-foreground shadow-brand">
       <div className="min-w-0">
         <h2 className="text-lg font-black">{t.trade}</h2>
         <p className="mt-1 text-xs font-medium opacity-75">{t.tradeSub}</p>

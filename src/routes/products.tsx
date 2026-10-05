@@ -1,23 +1,26 @@
 import { createFileRoute, Outlet, useRouterState } from "@tanstack/react-router";
-import { ChevronLeft, ChevronRight, Search } from "lucide-react";
+import { ChevronLeft, ChevronRight, Search, X } from "lucide-react";
 import { useMemo, useState, useEffect } from "react";
 import { ProductCard } from "@/components/catalog";
 import { products } from "@/lib/catalog";
 import { copy, useStore } from "@/lib/store";
 
-// تعريف البارامترات المسموحة في الرابط
+// دعم البحث بالقسم والماركة
 type ProductSearch = {
   category?: string;
+  brand?: string;
 };
 
 export const Route = createFileRoute("/products")({
   validateSearch: (search: Record<string, unknown>): ProductSearch => {
-    return { category: search.category as string | undefined };
+    return { 
+      category: search.category as string | undefined,
+      brand: search.brand as string | undefined
+    };
   },
   head: () => ({
     meta: [
       { title: "المنتجات | Faster" },
-      { name: "description", content: "تصفح وابحث عن قطع غيار السيارات الأصلية." },
     ],
   }),
   component: ProductsPage,
@@ -25,8 +28,6 @@ export const Route = createFileRoute("/products")({
 
 function ProductsPage() {
   const searchParams = Route.useSearch();
-  
-  // لمعرفة هل نحن في صفحة المنتجات الرئيسية أم في صفحة التفاصيل الفرعية
   const isExact = useRouterState({ 
     select: (s) => s.location.pathname === "/products" || s.location.pathname === "/products/" 
   });
@@ -36,14 +37,15 @@ function ProductsPage() {
   
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState(searchParams.category || "all");
+  const [activeBrand, setActiveBrand] = useState(searchParams.brand || "all");
   const [sort, setSort] = useState("default");
 
   useEffect(() => {
-    if (searchParams.category) {
-      setCategory(searchParams.category);
-    }
-  }, [searchParams.category]);
+    if (searchParams.category) setCategory(searchParams.category);
+    if (searchParams.brand) setActiveBrand(searchParams.brand);
+  }, [searchParams.category, searchParams.brand]);
 
+  // الأقسام زي ما إنت طلبت
   const cats = [
     { id: "all", ar: "الكل", en: "All" },
     { id: "suspension", ar: "تعليق", en: "Suspension" },
@@ -52,16 +54,21 @@ function ProductsPage() {
     { id: "electrical", ar: "كهرباء", en: "Electrical" },
   ];
 
+  // فلترة متقدمة (لو داس على براند + اختار قسم)
   const shown = useMemo(() => 
     products
-      .filter(p => (category === "all" || p.category === category) && (`${p.nameAr} ${p.nameEn} ${p.partNo}`.toLowerCase().includes(query.toLowerCase())))
+      .filter(p => {
+        const matchCategory = category === "all" || p.category === category;
+        const matchBrand = activeBrand === "all" || p.compatibility.some(c => c.toLowerCase().includes(activeBrand.toLowerCase()));
+        const matchQuery = (`${p.nameAr} ${p.nameEn} ${p.partNo}`).toLowerCase().includes(query.toLowerCase());
+        return matchCategory && matchBrand && matchQuery;
+      })
       .sort((a, b) => sort === "high" ? b.price - a.price : sort === "low" ? a.price - b.price : 0),
-    [query, category, sort]
+    [query, category, sort, activeBrand]
   );
 
   const Swipe = lang === "ar" ? ChevronLeft : ChevronRight;
 
-  // لو الرابط اتغير لصفحة التفاصيل، اعرض التفاصيل (Outlet) وأخفي لستة المنتجات
   if (!isExact) {
     return <Outlet />;
   }
@@ -80,6 +87,20 @@ function ProductsPage() {
       </section>
       
       <div className="mx-auto max-w-7xl px-4 py-6 md:px-6">
+        
+        {/* لو هو جاي من ضغطة براند، هنعرضله زرار صغير يلغي بيه الفلتر لو حابب */}
+        {activeBrand !== "all" && (
+          <div className="mb-4 flex items-center gap-2">
+            <span className="text-sm font-bold">{lang === "ar" ? " منتجات:" : "Showing products for:"}</span>
+            <button 
+              onClick={() => setActiveBrand("all")}
+              className="flex items-center gap-1 rounded-full bg-brand px-3 py-1 text-xs font-bold text-black hover:bg-brand-strong"
+            >
+              {activeBrand.toUpperCase()} <X className="size-3" />
+            </button>
+          </div>
+        )}
+
         <div className="relative">
           <div className="scrollbar-none flex gap-2 overflow-x-auto pb-2 pe-10">
             {cats.map(c => (
@@ -87,7 +108,7 @@ function ProductsPage() {
                 key={c.id} 
                 type="button" 
                 onClick={() => setCategory(c.id)} 
-                className={`shrink-0 rounded-full border px-5 py-2 text-xs font-bold transition-colors ${category === c.id ? "border-header bg-header text-brand" : "border-border bg-card"}`}
+                className={`shrink-0 rounded-full border px-5 py-2 text-xs font-bold transition-colors ${category === c.id ? "border-header bg-header text-brand" : "border-border bg-card hover:bg-accent"}`}
               >
                 {lang === "ar" ? c.ar : c.en}
               </button>
