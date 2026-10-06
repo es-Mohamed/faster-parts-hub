@@ -126,8 +126,19 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   
-  // جعل الشاشة تظهر كحالة ابتدائية دائماً لضمان تغطية انتقال الـ PWA
-  const [showSplash, setShowSplash] = useState(true);
+  const [showSplash, setShowSplash] = useState(() => {
+    if (typeof window !== "undefined") {
+      // التحقق مما إذا كان التطبيق مفتوحاً كبرنامج مثبت من الشاشة الرئيسية
+      const isInstalledApp = 
+        window.matchMedia('(display-mode: standalone)').matches || 
+        window.matchMedia('(display-mode: fullscreen)').matches || 
+        // دعم لأجهزة الآيفون (iOS)
+        ('standalone' in window.navigator && (window.navigator as any).standalone === true);
+      
+      return isInstalledApp;
+    }
+    return false;
+  });
   
   const isIsolatedRoute = pathname.startsWith('/auth') || 
                           pathname.startsWith('/dashboard') || 
