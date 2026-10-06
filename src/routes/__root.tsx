@@ -126,20 +126,8 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   
-  // تهيئة حالة شاشة البداية بذكاء (للموبايل فقط ولمرة واحدة في الجلسة)
-  const [showSplash, setShowSplash] = useState(() => {
-    if (typeof window !== "undefined") {
-      const isMobile = window.innerWidth < 768; // أقل من 768 بكسل يعتبر موبايل
-      const hasSeenSplash = sessionStorage.getItem("faster_splash_seen");
-
-      // إذا كان موبايل ولم يرى الشاشة من قبل في هذه الجلسة
-      if (isMobile && !hasSeenSplash) {
-        sessionStorage.setItem("faster_splash_seen", "true");
-        return true;
-      }
-    }
-    return false; // لا تظهر على الديسكتوب أو إذا تم عمل Refresh
-  });
+  // جعل الشاشة تظهر كحالة ابتدائية دائماً لضمان تغطية انتقال الـ PWA
+  const [showSplash, setShowSplash] = useState(true);
   
   const isIsolatedRoute = pathname.startsWith('/auth') || 
                           pathname.startsWith('/dashboard') || 

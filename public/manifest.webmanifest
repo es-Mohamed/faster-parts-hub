@@ -1,9 +1,9 @@
 {
-  "name": "Faster Auto Spare Parts",
+  "name": " Automotive Spare Parts ",
   "short_name": "Faster",
   "description": "Genuine automotive spare parts platform",
   "start_url": "/",
-  "display": "standalone",
+  "display": "fullscreen",
   "background_color": "#0A0A0A",
   "theme_color": "#0A0A0A",
   "icons": [
