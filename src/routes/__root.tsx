@@ -128,16 +128,22 @@ function RootComponent() {
   
   const [showSplash, setShowSplash] = useState(() => {
     if (typeof window !== "undefined") {
-      // التحقق مما إذا كان التطبيق مفتوحاً كبرنامج مثبت من الشاشة الرئيسية
+      // 1. هل التطبيق مفتوح كبرنامج مثبت؟
       const isInstalledApp = 
         window.matchMedia('(display-mode: standalone)').matches || 
         window.matchMedia('(display-mode: fullscreen)').matches || 
-        // دعم لأجهزة الآيفون (iOS)
         ('standalone' in window.navigator && (window.navigator as any).standalone === true);
       
-      return isInstalledApp;
+      // 2. هل المستخدم رأى الشاشة في هذه الجلسة؟
+      const hasSeenSplash = sessionStorage.getItem("faster_splash_seen");
+
+      // تظهر فقط إذا كان تطبيقاً مثبتاً ولم يراها من قبل
+      if (isInstalledApp && !hasSeenSplash) {
+        sessionStorage.setItem("faster_splash_seen", "true");
+        return true;
+      }
     }
-    return false;
+    return false; // لا تظهر في المتصفح العادي أو عند الـ Refresh
   });
   
   const isIsolatedRoute = pathname.startsWith('/auth') || 
