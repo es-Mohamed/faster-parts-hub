@@ -1,6 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useRouterState } from "@tanstack/react-router";
-import { SplashScreen } from "@/components/SplashScreen";
+// import { useRouterState } from "@tanstack/react-router";
+// import { SplashScreen } from "@/components/SplashScreen";
 import {
   Outlet,
   Link,
@@ -122,51 +122,51 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
-function RootComponent() {
-  const { queryClient } = Route.useRouteContext();
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
+// function RootComponent() {
+//   const { queryClient } = Route.useRouteContext();
+//   const pathname = useRouterState({ select: (s) => s.location.pathname });
   
-  const [showSplash, setShowSplash] = useState(() => {
-    if (typeof window !== "undefined") {
-      // 1. هل التطبيق مفتوح كبرنامج مثبت؟
-      const isInstalledApp = 
-        window.matchMedia('(display-mode: standalone)').matches || 
-        window.matchMedia('(display-mode: fullscreen)').matches || 
-        ('standalone' in window.navigator && (window.navigator as any).standalone === true);
+//   const [showSplash, setShowSplash] = useState(() => {
+//     if (typeof window !== "undefined") {
+//       // 1. هل التطبيق مفتوح كبرنامج مثبت؟
+//       const isInstalledApp = 
+//         window.matchMedia('(display-mode: standalone)').matches || 
+//         window.matchMedia('(display-mode: fullscreen)').matches || 
+//         ('standalone' in window.navigator && (window.navigator as any).standalone === true);
       
-      // 2. هل المستخدم رأى الشاشة في هذه الجلسة؟
-      const hasSeenSplash = sessionStorage.getItem("faster_splash_seen");
+//       // 2. هل المستخدم رأى الشاشة في هذه الجلسة؟
+//       const hasSeenSplash = sessionStorage.getItem("faster_splash_seen");
 
-      // تظهر فقط إذا كان تطبيقاً مثبتاً ولم يراها من قبل
-      if (isInstalledApp && !hasSeenSplash) {
-        sessionStorage.setItem("faster_splash_seen", "true");
-        return true;
-      }
-    }
-    return false; // لا تظهر في المتصفح العادي أو عند الـ Refresh
-  });
+//       // تظهر فقط إذا كان تطبيقاً مثبتاً ولم يراها من قبل
+//       if (isInstalledApp && !hasSeenSplash) {
+//         sessionStorage.setItem("faster_splash_seen", "true");
+//         return true;
+//       }
+//     }
+//     return false; // لا تظهر في المتصفح العادي أو عند الـ Refresh
+//   });
   
-  const isIsolatedRoute = pathname.startsWith('/auth') || 
-                          pathname.startsWith('/dashboard') || 
-                          pathname.startsWith('/admin');
+//   const isIsolatedRoute = pathname.startsWith('/auth') || 
+//                           pathname.startsWith('/dashboard') || 
+//                           pathname.startsWith('/admin');
 
-  return (
-    <QueryClientProvider client={queryClient}>
-      <StoreProvider>
-        {showSplash ? (
-          <SplashScreen onComplete={() => setShowSplash(false)} />
-        ) : (
-          <div className="animate-in fade-in duration-500">
-            {isIsolatedRoute ? (
-              <Outlet />
-            ) : (
-              <FasterShell>
-                <Outlet />
-              </FasterShell>
-            )}
-          </div>
-        )}
-      </StoreProvider>
-    </QueryClientProvider>
-  );
-}
+//   return (
+//     <QueryClientProvider client={queryClient}>
+//       <StoreProvider>
+//         {showSplash ? (
+//           <SplashScreen onComplete={() => setShowSplash(false)} />
+//         ) : (
+//           <div className="animate-in fade-in duration-500">
+//             {isIsolatedRoute ? (
+//               <Outlet />
+//             ) : (
+//               <FasterShell>
+//                 <Outlet />
+//               </FasterShell>
+//             )}
+//           </div>
+//         )}
+//       </StoreProvider>
+//     </QueryClientProvider>
+//   );
+// }
