@@ -33,17 +33,24 @@ function LoginPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const user = MOCK_USERS[email.toLowerCase()];
     
-    if (user && password === "123456") {
-      setError(false);
-      login(user);
-      // تفعيل ظهور زر البصمة للمرات القادمة
-      localStorage.setItem("faster_has_logged_in", "true");
-      navigate({ to: user.role === "admin" ? "/admin" : "/dashboard" });
-    } else {
-      setError(true);
+    // إنشاء مستخدم تجريبي بناءً على الإدخال لتسهيل الاختبار
+    let user = MOCK_USERS[email.toLowerCase()];
+    
+    if (!user) {
+      user = {
+        id: `usr_test_${Math.floor(Math.random() * 1000)}`,
+        name: "مستخدم تجريبي",
+        phone: "01000000000",
+        // توجيه ذكي: لو الإيميل يحتوي على admin نفتح لوحة التحكم، غير كده نفتح حساب العميل
+        role: email.toLowerCase().includes("admin") ? "admin" : "consumer"
+      };
     }
+
+    setError(false);
+    login(user);
+    localStorage.setItem("faster_has_logged_in", "true");
+    navigate({ to: user.role === "admin" ? "/admin" : "/dashboard" });
   };
 
   const handleBiometricLogin = async () => {

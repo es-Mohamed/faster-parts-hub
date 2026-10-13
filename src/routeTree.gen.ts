@@ -30,9 +30,9 @@ import { Route as AuthRegisterRouteImport } from './routes/auth/register'
 import { Route as AuthResetRouteImport } from './routes/auth/reset'
 import { Route as AuthVerifyRouteImport } from './routes/auth/verify'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
+import { Route as DashboardNotificationsRouteImport } from './routes/dashboard/notifications'
 import { Route as DashboardOrdersRouteImport } from './routes/dashboard/orders'
 import { Route as DashboardProfileRouteImport } from './routes/dashboard/profile'
-import { Route as DashboardVehiclesRouteImport } from './routes/dashboard/vehicles'
 import { Route as ProductsProductIdRouteImport } from './routes/products.$productId'
 
 const IndexRoute = IndexRouteImport.update({
@@ -140,6 +140,11 @@ const DashboardIndexRoute = DashboardIndexRouteImport.update({
   path: '/',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
+const DashboardNotificationsRoute = DashboardNotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
 const DashboardOrdersRoute = DashboardOrdersRouteImport.update({
   id: '/orders',
   path: '/orders',
@@ -148,11 +153,6 @@ const DashboardOrdersRoute = DashboardOrdersRouteImport.update({
 const DashboardProfileRoute = DashboardProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
-  getParentRoute: () => DashboardRouteRoute,
-} as any)
-const DashboardVehiclesRoute = DashboardVehiclesRouteImport.update({
-  id: '/vehicles',
-  path: '/vehicles',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
 const ProductsProductIdRoute = ProductsProductIdRouteImport.update({
@@ -181,9 +181,9 @@ export interface FileRoutesByFullPath {
   '/auth/register': typeof AuthRegisterRoute
   '/auth/reset': typeof AuthResetRoute
   '/auth/verify': typeof AuthVerifyRoute
+  '/dashboard/notifications': typeof DashboardNotificationsRoute
   '/dashboard/orders': typeof DashboardOrdersRoute
   '/dashboard/profile': typeof DashboardProfileRoute
-  '/dashboard/vehicles': typeof DashboardVehiclesRoute
   '/products/$productId': typeof ProductsProductIdRoute
   '/admin/': typeof AdminIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
@@ -206,9 +206,9 @@ export interface FileRoutesByTo {
   '/auth/register': typeof AuthRegisterRoute
   '/auth/reset': typeof AuthResetRoute
   '/auth/verify': typeof AuthVerifyRoute
+  '/dashboard/notifications': typeof DashboardNotificationsRoute
   '/dashboard/orders': typeof DashboardOrdersRoute
   '/dashboard/profile': typeof DashboardProfileRoute
-  '/dashboard/vehicles': typeof DashboardVehiclesRoute
   '/products/$productId': typeof ProductsProductIdRoute
   '/admin': typeof AdminIndexRoute
   '/dashboard': typeof DashboardIndexRoute
@@ -234,9 +234,9 @@ export interface FileRoutesById {
   '/auth/register': typeof AuthRegisterRoute
   '/auth/reset': typeof AuthResetRoute
   '/auth/verify': typeof AuthVerifyRoute
+  '/dashboard/notifications': typeof DashboardNotificationsRoute
   '/dashboard/orders': typeof DashboardOrdersRoute
   '/dashboard/profile': typeof DashboardProfileRoute
-  '/dashboard/vehicles': typeof DashboardVehiclesRoute
   '/products/$productId': typeof ProductsProductIdRoute
   '/admin/': typeof AdminIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
@@ -263,9 +263,9 @@ export interface FileRouteTypes {
     | '/auth/register'
     | '/auth/reset'
     | '/auth/verify'
+    | '/dashboard/notifications'
     | '/dashboard/orders'
     | '/dashboard/profile'
-    | '/dashboard/vehicles'
     | '/products/$productId'
     | '/admin/'
     | '/dashboard/'
@@ -288,9 +288,9 @@ export interface FileRouteTypes {
     | '/auth/register'
     | '/auth/reset'
     | '/auth/verify'
+    | '/dashboard/notifications'
     | '/dashboard/orders'
     | '/dashboard/profile'
-    | '/dashboard/vehicles'
     | '/products/$productId'
     | '/admin'
     | '/dashboard'
@@ -315,9 +315,9 @@ export interface FileRouteTypes {
     | '/auth/register'
     | '/auth/reset'
     | '/auth/verify'
+    | '/dashboard/notifications'
     | '/dashboard/orders'
     | '/dashboard/profile'
-    | '/dashboard/vehicles'
     | '/products/$productId'
     | '/admin/'
     | '/dashboard/'
@@ -486,6 +486,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardIndexRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
+    '/dashboard/notifications': {
+      id: '/dashboard/notifications'
+      path: '/notifications'
+      fullPath: '/dashboard/notifications'
+      preLoaderRoute: typeof DashboardNotificationsRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
     '/dashboard/orders': {
       id: '/dashboard/orders'
       path: '/orders'
@@ -498,13 +505,6 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/dashboard/profile'
       preLoaderRoute: typeof DashboardProfileRouteImport
-      parentRoute: typeof DashboardRouteRoute
-    }
-    '/dashboard/vehicles': {
-      id: '/dashboard/vehicles'
-      path: '/vehicles'
-      fullPath: '/dashboard/vehicles'
-      preLoaderRoute: typeof DashboardVehiclesRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
     '/products/$productId': {
@@ -556,16 +556,16 @@ const AuthRouteRouteWithChildren = AuthRouteRoute._addFileChildren(
 )
 
 interface DashboardRouteRouteChildren {
+  DashboardNotificationsRoute: typeof DashboardNotificationsRoute
   DashboardOrdersRoute: typeof DashboardOrdersRoute
   DashboardProfileRoute: typeof DashboardProfileRoute
-  DashboardVehiclesRoute: typeof DashboardVehiclesRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
 }
 
 const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
+  DashboardNotificationsRoute: DashboardNotificationsRoute,
   DashboardOrdersRoute: DashboardOrdersRoute,
   DashboardProfileRoute: DashboardProfileRoute,
-  DashboardVehiclesRoute: DashboardVehiclesRoute,
   DashboardIndexRoute: DashboardIndexRoute,
 }
 

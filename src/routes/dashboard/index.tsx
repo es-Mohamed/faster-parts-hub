@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { LayoutDashboard, FileText, Car, Wallet, ArrowRight, Plus, ExternalLink, ShieldCheck, Clock } from "lucide-react";
+import { LayoutDashboard, FileText, Wallet, ArrowRight, ExternalLink, ShieldCheck, Clock, Bell, BellRing } from "lucide-react";
 import { useStore } from "@/lib/store";
 
 export const Route = createFileRoute("/dashboard/")({
@@ -13,7 +13,8 @@ function DashboardOverview() {
   const stats = [
     { title: isArabic ? "إجمالي الطلبات" : "Total Orders", value: "12", icon: FileText, color: "text-[#FACC15]" },
     { title: isArabic ? "طلبات قيد التنفيذ" : "Active Orders", value: "2", icon: Clock, color: "text-blue-500" },
-    { title: isArabic ? "سياراتي المحفوظة" : "Saved Vehicles", value: "3", icon: Car, color: "text-emerald-500" },
+    // تم التعديل هنا: تحويل السيارات إلى الإشعارات
+    { title: isArabic ? "إشعارات جديدة" : "New Notifications", value: "3", icon: BellRing, color: "text-rose-500" },
     { title: isArabic ? "رصيد الحساب / الآجل" : "Account Ledger", value: "0.00 ج.م", icon: Wallet, color: "text-purple-500" },
   ];
 
@@ -26,11 +27,11 @@ function DashboardOverview() {
             {isArabic ? `أهلاً بك، ${user?.name || "عميلنا العزيز"} 👋` : `Welcome, ${user?.name || "Customer"} 👋`}
           </h1>
           <p className="mt-1 text-xs text-muted-foreground">
-            {isArabic ? "متابعة سريعة لطلباتك وسيارتك وكشف الحساب" : "Quick overview of your orders, vehicles, and ledger"}
+            {isArabic ? "متابعة سريعة لطلباتك، إشعاراتك، وكشف الحساب" : "Quick overview of your orders, notifications, and ledger"}
           </p>
         </div>
 
-        {/* زر الرجوع للرئيسية الشيك */}
+        {/* زر الرجوع للرئيسية */}
         <Link
           to="/"
           className="flex items-center gap-2 rounded-xl border border-border bg-card px-4 py-2 text-xs font-semibold text-foreground transition-all hover:border-[#FACC15] hover:text-[#FACC15]"
@@ -57,19 +58,20 @@ function DashboardOverview() {
 
       {/* اختصارات سريعة */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* تم التعديل هنا: اختصار الإشعارات بدلاً من إضافة سيارة */}
         <Link
-          to="/dashboard/vehicles"
+          to="/dashboard/notifications"
           className="group flex items-center justify-between rounded-xl border border-border bg-card p-5 transition-all hover:border-[#FACC15]"
         >
           <div className="flex items-center gap-3">
             <div className="grid size-10 place-items-center rounded-lg bg-[#FACC15]/10 text-[#FACC15]">
-              <Plus className="size-5" />
+              <Bell className="size-5" />
             </div>
             <div>
               <p className="font-bold text-foreground group-hover:text-[#FACC15] transition-colors">
-                {isArabic ? "إضافة سيارة جديدة" : "Add New Vehicle"}
+                {isArabic ? "استعراض الإشعارات" : "View Notifications"}
               </p>
-              <p className="text-xs text-muted-foreground">{isArabic ? "لتصفح قطع الغيار المطابقة" : "For quick parts match"}</p>
+              <p className="text-xs text-muted-foreground">{isArabic ? "متابعة أحدث التنبيهات وحالة طلباتك" : "Check latest updates & orders"}</p>
             </div>
           </div>
           <ExternalLink className="size-4 text-muted-foreground group-hover:text-[#FACC15]" />

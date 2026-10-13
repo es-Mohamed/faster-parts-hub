@@ -1,9 +1,8 @@
 import { createFileRoute, Outlet, Link, redirect, useNavigate } from "@tanstack/react-router";
-import { LayoutDashboard, FileText, Car, LogOut } from "lucide-react";
+import { LayoutDashboard, FileText, Bell, LogOut, User as UserIcon } from "lucide-react";
 import { useStore } from "@/lib/store";
 import logoAsset from "@/assets/faster-logo.png";
 
-// استبدل الجزء الخاص بـ Route فقط في أول الملف
 export const Route = createFileRoute("/dashboard")({
   beforeLoad: () => {
     const savedUser = sessionStorage.getItem("faster-user");
@@ -20,8 +19,6 @@ export const Route = createFileRoute("/dashboard")({
       console.error("Error parsing user data", e);
     }
 
-    // 🚀 التوجيه بقى بره الـ try/catch 
-    // لو الرول أدمن، اطرده فورا للوحة الإدارة
     if (userRole === "admin") {
       throw redirect({ to: "/admin" });
     }
@@ -39,12 +36,12 @@ function DashboardLayout() {
     navigate({ to: "/" });
   };
 
-  // قائمة خاصة بالعميل فقط (نظيفة ومفيهاش أي ربط بالأدمن)
   const navItems = [
     { to: "/dashboard", icon: LayoutDashboard, label: isArabic ? "نظرة عامة" : "Overview", exact: true },
     { to: "/dashboard/orders", icon: FileText, label: isArabic ? "طلباتي وكشف الحساب" : "Orders & Ledger" },
-    { to: "/dashboard/vehicles", icon: Car, label: isArabic ? "سياراتي المحفوظة" : "My Vehicles" },
-    { to: "/dashboard/profile", icon: Car, label: isArabic ? "الملف الشخصي" : "Profile" },
+    // تم التعديل هنا
+    { to: "/dashboard/notifications", icon: Bell, label: isArabic ? "الإشعارات" : "Notifications" },
+    { to: "/dashboard/profile", icon: UserIcon, label: isArabic ? "الملف الشخصي" : "Profile" },
   ];
 
   return (
@@ -102,7 +99,6 @@ function DashboardLayout() {
 
       {/* المحتوى الرئيسي */}
       <main className="flex-1 pb-20 md:pb-0">
-        {/* هيدر الموبايل */}
         <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border bg-card px-4 md:hidden">
           <Link to="/" className="flex items-center gap-2">
             <img src={logoAsset} alt="Faster" className="h-6 w-auto" />

@@ -7,6 +7,11 @@ import { ProductCard, SectionTitle, TradeBanner, TrustStrip } from "@/components
 import { products } from "@/lib/catalog";
 import { copy, useStore } from "@/lib/store";
 
+import review1 from "@/assets/Gemini_Generated_Image_1xi8qg1xi8qg1xi8.jfif";
+import review2 from "@/assets/Gemini_Generated_Image_sxqarlsxqarlsxqa.jfif";
+import review3 from "@/assets/Gemini_Generated_Image_j77ukwj77ukwj77u.jfif";
+import review4 from "@/assets/Gemini_Generated_Image_6wseex6wseex6wse.jfif";
+import review5 from "@/assets/Gemini_Generated_Image_2eqpzp2eqpzp2eqp.jfif";
 import heroEngine from "@/assets/hero-engine.jpg";
 import heroSuspension from "@/assets/hero-suspension.jpg";
 import heroBrakes from "@/assets/hero-brakes.jpg";
@@ -35,7 +40,6 @@ function Index() {
   const { lang } = useStore();
   const t = copy[lang];
   
-  // تم إضافة id لكل قسم عشان نستخدمه في الفلترة
   const cats = [
     { id: "suspension", Icon: CircleGauge, ar: "التعليق", en: "Suspension", n: "14" },
     { id: "brakes", Icon: Disc3, ar: "الفرامل", en: "Brakes", n: "62" },
@@ -51,7 +55,6 @@ function Index() {
           <SectionTitle title={t.categories} to="/products" />
           <div className="grid grid-cols-4 gap-2 md:gap-4">
             {cats.map(({ id, Icon, ar, en, n }) => (
-              // تم إضافة search params لتوجيه المستخدم للقسم الصحيح
               <Link 
                 to="/products" 
                 search={{ category: id }} 
@@ -65,14 +68,32 @@ function Index() {
             ))}
           </div>
         </section>
+        
         <TradeBanner />
-        <section><SectionTitle title={t.brands} /><BrandMarquee /></section>
+        
+        <section>
+          <SectionTitle title={t.brands} />
+          <BrandMarquee />
+        </section>
+        
         <section>
           <SectionTitle title={t.featured} to="/products" />
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-5">
             {products.map(p => <ProductCard key={p.id} product={p} />)}
           </div>
         </section>
+
+        {/* قسم الآراء بعد التعديل ليكون العنوان في المنتصف */}
+        <section>
+          <div className="mb-8 text-center">
+            <h2 className="text-2xl font-bold md:text-3xl">
+              {lang === "ar" ? "آراء شركاء النجاح" : "Customer Testimonials"}
+            </h2>
+            <div className="mx-auto mt-3 h-1 w-20 rounded-full bg-brand" />
+          </div>
+          <TestimonialsMarquee />
+        </section>
+
         <TrustStrip />
       </div>
     </>
@@ -96,7 +117,6 @@ function HeroCarousel({ lang, t }: { lang: "ar" | "en"; t: typeof copy.ar }) {
   const slide = heroSlides[active] ?? heroSlides[0];
 
   return (
-    // بدلاً من h-[50vh] min-h-[400px]
     <section className="relative h-[40vh] min-h-[320px] overflow-hidden bg-black text-white md:h-[calc(100vh-5rem)] md:min-h-[600px]">
       <AnimatePresence mode="sync">
         <motion.img 
@@ -140,7 +160,6 @@ function HeroCarousel({ lang, t }: { lang: "ar" | "en"; t: typeof copy.ar }) {
         </motion.div>
       </div>
 
-      {/* Pagination Dots */}
       <div className="absolute bottom-6 left-1/2 flex -translate-x-1/2 gap-2 md:bottom-10">
         {heroSlides.map((item, i) => (
           <button 
@@ -158,6 +177,53 @@ function HeroCarousel({ lang, t }: { lang: "ar" | "en"; t: typeof copy.ar }) {
   );
 }
 
+function TestimonialsMarquee() {
+  const { lang } = useStore();
+  const reviews = [review1, review2, review3, review4, review5];
+
+  return (
+    <div className="relative flex w-full gap-4 overflow-hidden py-6 group cursor-pointer">
+      {/* ستايل مدمج لضمان عمل الحركة اللانهائية بشكل مثالي حسب اتجاه اللغة */}
+      <style>{`
+        @keyframes scroll-left {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(calc(-100% - 1rem)); }
+        }
+        @keyframes scroll-right {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(calc(100% + 1rem)); }
+        }
+        .animate-scroll-left { animation: scroll-left 30s linear infinite; }
+        .animate-scroll-right { animation: scroll-right 30s linear infinite; }
+      `}</style>
+
+      {/* نكرر بلوك الصور مرتين لضمان استمرارية الحركة بدون فراغات نهائياً */}
+      {[...Array(2)].map((_, containerIndex) => (
+        <div 
+          key={containerIndex} 
+          className={`flex shrink-0 gap-4 group-hover:[animation-play-state:paused] ${
+            lang === "ar" ? "animate-scroll-right" : "animate-scroll-left"
+          }`}
+        >
+          {reviews.map((img, i) => (
+            <div key={i} className="shrink-0 w-[280px] md:w-[350px] rounded-xl overflow-hidden border border-border bg-card shadow-sm transition-transform hover:scale-[1.02]">
+              <img 
+                src={img} 
+                alt="رأي العميل" 
+                className="w-full h-auto object-cover" 
+                loading="lazy" 
+              />
+            </div>
+          ))}
+        </div>
+      ))}
+      
+      <div className="pointer-events-none absolute inset-y-0 left-0 w-12 bg-gradient-to-r from-background to-transparent z-10" />
+      <div className="pointer-events-none absolute inset-y-0 right-0 w-12 bg-gradient-to-l from-background to-transparent z-10" />
+    </div>
+  );
+}
+
 function BrandMarquee() {
   const { lang } = useStore();
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -171,10 +237,8 @@ function BrandMarquee() {
     { id: "suzuki", name: "Suzuki", src: brandMazda }
   ];
 
-  // تكرار اللوجوهات لعمل شريط لا نهائي
   const repeatedLogos = Array(6).fill(logos).flat();
 
-  // الحركة التلقائية
   useEffect(() => {
     if (isPaused) return;
     const interval = setInterval(() => {
@@ -182,11 +246,10 @@ function BrandMarquee() {
         const sign = lang === "ar" ? -1 : 1;
         scrollRef.current.scrollBy({ left: sign * 1.5 });
       }
-    }, 30); // سرعة الحركة
+    }, 30);
     return () => clearInterval(interval);
   }, [isPaused, lang]);
 
-  // التحكم اليدوي بالأسهم
   const scroll = (direction: "left" | "right") => {
     if (scrollRef.current) {
       const sign = lang === "ar" ? -1 : 1;
@@ -203,7 +266,6 @@ function BrandMarquee() {
       onTouchStart={() => setIsPaused(true)}
       onTouchEnd={() => setIsPaused(false)}
     >
-      {/* بادج توضيحي شيك ليعرف المستخدم أنه قابل للضغط */}
       <div className="absolute top-2 z-10 flex w-full justify-center opacity-70 transition-opacity group-hover:opacity-100">
         <span className="flex items-center gap-1.5 rounded-full bg-background/80 px-3 py-1 text-[10px] font-bold text-muted-foreground backdrop-blur md:text-xs">
           <MousePointerClick className="size-3" />
@@ -211,7 +273,6 @@ function BrandMarquee() {
         </span>
       </div>
 
-      {/* زر السهم يمين (عائم) */}
       <button 
         onClick={() => scroll("right")} 
         className="absolute right-2 top-1/2 z-20 grid size-10 -translate-y-1/2 place-items-center rounded-full bg-background/90 text-foreground opacity-0 shadow-md backdrop-blur transition-all duration-300 hover:scale-110 hover:bg-brand hover:text-black group-hover:opacity-100 md:size-12"
@@ -219,7 +280,6 @@ function BrandMarquee() {
         <ChevronRight className="size-6 md:size-7" />
       </button>
 
-      {/* زر السهم يسار (عائم) */}
       <button 
         onClick={() => scroll("left")} 
         className="absolute left-2 top-1/2 z-20 grid size-10 -translate-y-1/2 place-items-center rounded-full bg-background/90 text-foreground opacity-0 shadow-md backdrop-blur transition-all duration-300 hover:scale-110 hover:bg-brand hover:text-black group-hover:opacity-100 md:size-12"
@@ -227,7 +287,6 @@ function BrandMarquee() {
         <ChevronLeft className="size-6 md:size-7" />
       </button>
 
-      {/* شريط الماركات */}
       <div 
         ref={scrollRef} 
         className="scrollbar-none flex gap-4 overflow-x-auto px-4 pt-4"
